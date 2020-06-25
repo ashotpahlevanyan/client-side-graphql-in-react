@@ -5,27 +5,37 @@ import PetsList from '../components/PetsList'
 import NewPetModal from '../components/NewPetModal'
 import Loader from '../components/Loader'
 
+
+const PETS_FIELDS = gql`
+  fragment PetsFields on Pet {
+    id
+    name 
+    type
+    img
+    vaccinated @client
+    owner {
+      id
+      age @client
+    }
+  }
+`;
+
 const ALL_PETS = gql`
   query AllPets {
     pets {
-      id
-      name 
-      type
-      img
-      __typename
+        ...PetsFields
     }
   }
+  ${PETS_FIELDS}
 `;
 
 const NEW_PET = gql`
   mutation CreateAPet($newPet: NewPetInput!) {
     addPet(input: $newPet) {
-      id
-      name
-      type
-      img
+      ...PetsFields
     }
   }
+  ${PETS_FIELDS}
 `;
 
 export default function Pets () {
@@ -70,10 +80,6 @@ export default function Pets () {
     });
   }
 
-  if (modal) {
-    return <NewPetModal onSubmit={onSubmit} onCancel={() => setModal(false)} />
-  }
-
   if(loading) {
     return <Loader />;
   }
@@ -81,6 +87,17 @@ export default function Pets () {
   if(error || newPet.error) {
     return <p>error</p>
   }
+
+  console.log(data.pets[0]);
+
+  if (modal) {
+    return <NewPetModal onSubmit={onSubmit} onCancel={() => setModal(false)} />
+  }
+
+
+
+
+
   return (
     <div className="page pets-page">
       <section>
